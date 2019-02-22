@@ -1,0 +1,11 @@
+            <div v-if="editAdress === adress.IP">
+                <input v-on:keyup.13="updateAdress(adress)" v-model="adress.IP" />
+                <input v-on:keyup.13="updateAdress(adress)" v-model="adress.Note" />
+                <input v-on:keyup.13="updateAdress(adress)" v-model="adress.SiteID" />
+                <button v-on:click="updateAdress(adress)">Сохранить</button>
+                <button v-on:click="editAdress = null">Отмена</button>
+                <button v-on:click="deleteAdress(adress.IP, i)">Удалить</button>
+            </div>
+            <div v-else>
+                <button v-on:click="editAdress = adress.IP">Редактировать</button>
+            </div>
