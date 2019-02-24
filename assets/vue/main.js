@@ -2,7 +2,12 @@ const app = new Vue({
     el: "#app",
     data:{
         editAdress: null,
-        adresses: [],            
+        adresses: {
+            type: Array,
+            default: function(){
+                return []
+            },
+        },            
         adress: {
             IP: '',
             Note: '',
@@ -138,7 +143,6 @@ const app = new Vue({
             ],
         
         },
-
     },
     methods:{
         httpadress(value){
@@ -327,6 +331,8 @@ const app = new Vue({
     },
     template:`
     <div> 
+    <h1>Состояние спутниковых станций и серверов</h1>
+
         <div v-if="editAdress === 100">
             IP-адрес: <input v-on:keyup.13="createAdress()" v-model="IP"    />
             <br>Описание: <input v-on:keyup.13="createAdress()" v-model="Note" />
