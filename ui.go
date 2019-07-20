@@ -17,42 +17,53 @@ type StatusType struct {
 	NumFail    int
 }
 
+//StatusNowType type for dysplay status last check
+type StatusNowType struct {
+	Code string
+}
+
+//StatusOfHourType type for calculate of check
+type StatusOfHourType struct {
+	NumPass int
+	NumFail int
+}
+
 //LineOfStatusTableType type for display of table
 type LineOfStatusTableType struct {
 	IP           string
 	Note         string
 	SiteID       string
-	StatusNow    StatusType
-	StatusOfHour [24]StatusType
+	StatusNow    StatusNowType
+	StatusOfHour [24]StatusOfHourType
 }
 
 type tableOfStatusType struct {
 	Data map[string]LineOfStatusTableType
 }
 
-func (status *StatusType) calculate() {
-	if status.NumFail != 0 && status.NumPass != 0 {
-		if status.NumFail > status.NumPass {
-			status.Background = "bgpalevioletred"
-			status.Code = "X"
-		} else if status.NumFail < status.NumPass {
-			status.Background = "bgyellowgreen"
-			status.Code = "√"
-		} else {
-			status.Background = "bgyellow"
-			status.Code = "√"
-		}
-	} else if status.NumFail == 0 && status.NumPass != 0 {
-		status.Background = "bggreen"
-		status.Code = "√"
-	} else if status.NumFail != 0 && status.NumPass == 0 {
-		status.Background = "bgred"
-		status.Code = "X"
-	} else {
-		status.Background = "bggrey"
-		status.Code = "O"
-	}
-}
+// func (status *StatusOfHourType) calculate() {
+// 	if status.NumFail != 0 && status.NumPass != 0 {
+// 		if status.NumFail > status.NumPass {
+// 			status.Background = "bgpalevioletred"
+// 			status.Code = "X"
+// 		} else if status.NumFail < status.NumPass {
+// 			status.Background = "bgyellowgreen"
+// 			status.Code = "√"
+// 		} else {
+// 			status.Background = "bgyellow"
+// 			status.Code = "√"
+// 		}
+// 	} else if status.NumFail == 0 && status.NumPass != 0 {
+// 		status.Background = "bggreen"
+// 		status.Code = "√"
+// 	} else if status.NumFail != 0 && status.NumPass == 0 {
+// 		status.Background = "bgred"
+// 		status.Code = "X"
+// 	} else {
+// 		status.Background = "bggrey"
+// 		status.Code = "O"
+// 	}
+// }
 
 func (tos *tableOfStatusType) fillShapku(source map[string]ServersAttr) {
 	for IP, value := range source {
@@ -80,7 +91,7 @@ func (tos *tableOfStatusType) storageToCache(date string) {
 		s, _, _ = r.ReadLine()
 		i++
 	}
-	tos.fillTable()
+	// tos.fillTable()
 }
 
 func (tos *tableOfStatusType) parseLogLine(b []byte) {
@@ -96,28 +107,26 @@ func (tos *tableOfStatusType) parseLogLine(b []byte) {
 	if rttStr == "0" {
 		status.StatusOfHour[hour].NumFail++
 		status.StatusNow.Code = "X"
-		status.StatusNow.Background = "bgred"
 	} else {
 		status.StatusOfHour[hour].NumPass++
-		status.StatusNow.Background = "bggreen"
 		status.StatusNow.Code = "√"
 	}
 	tos.Data[IP] = status
 }
 
-func (tos *tableOfStatusType) fillTable() {
-	for IP, status := range tos.Data {
-		if IP == "IP адрес" {
-			continue
-		}
-		for i := 0; i < 24; i++ {
-			cellstatus := status.StatusOfHour[i]
-			cellstatus.calculate()
-			status.StatusOfHour[i] = cellstatus
-		}
-		tos.Data[IP] = status
-	}
-}
+// func (tos *tableOfStatusType) fillTable() {
+// 	for IP, status := range tos.Data {
+// 		// if IP == "IP адрес" {
+// 		// 	continue
+// 		// }
+// 		for i := 0; i < 24; i++ {
+// 			cellstatus := status.StatusOfHour[i]
+// 			// cellstatus.calculate()
+// 			status.StatusOfHour[i] = cellstatus
+// 		}
+// 		tos.Data[IP] = status
+// 	}
+// }
 
 func (tos *tableOfStatusType) clearCache() {
 	for IP, line := range tos.Data {
@@ -134,28 +143,28 @@ func (tos *tableOfStatusType) clearCache() {
 
 }
 
-//DelHeader Delete Header from map
-func (tos *tableOfStatusType) DelHeader() {
-	delete(tos.Data, "IP адрес")
-}
+// //DelHeader Delete Header from map
+// func (tos *tableOfStatusType) DelHeader() {
+// 	delete(tos.Data, "IP адрес")
+// }
 
 //AddHeader Add Header to map
-func (tos *tableOfStatusType) AddHeader() {
-	var serverElm LineOfStatusTableType
-	serverElm.IP = "IP адрес"
-	serverElm.Note = "Описание"
-	serverElm.SiteID = "SiteID"
-	serverElm.StatusNow.Code = "Сейчас"
-	for i := 24; i > 0; i-- {
-		str := strconv.Itoa(i - 1)
-		if len(str) == 1 {
-			serverElm.StatusOfHour[i-1].Code = "0" + str
-		} else {
-			serverElm.StatusOfHour[i-1].Code = str
-		}
-	}
-	tos.Data["IP адрес"] = serverElm
-}
+// func (tos *tableOfStatusType) AddHeader() {
+// 	var serverElm LineOfStatusTableType
+// 	serverElm.IP = "IP адрес"
+// 	serverElm.Note = "Описание"
+// 	serverElm.SiteID = "SiteID"
+// 	serverElm.StatusNow.Code = "Сейчас"
+// 	for i := 24; i > 0; i-- {
+// 		str := strconv.Itoa(i - 1)
+// 		if len(str) == 1 {
+// 			serverElm.StatusOfHour[i-1].Code = "0" + str
+// 		} else {
+// 			serverElm.StatusOfHour[i-1].Code = str
+// 		}
+// 	}
+// 	tos.Data["IP адрес"] = serverElm
+// }
 
 func (tos *tableOfStatusType) checkactualListIP(servers *ListOfServers) {
 	for IP := range tos.Data {

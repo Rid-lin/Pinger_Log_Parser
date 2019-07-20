@@ -9,12 +9,18 @@ var tos tableOfStatusType
 
 func main() {
 	intro()
-	// Загружаю конфиг
-	servers.Data = make(map[string]ServersAttr)
+
+	// Подготавливаю мапу для заливки
 	tos.Data = make(map[string]LineOfStatusTableType)
+
+	//Подготавливаю мапу для заливки конфига
+	servers.Data = make(map[string]ServersAttr)
+	// Загружаю конфиг
 	servers.LoadConfig("./config.json")
+
+	// Переношу загруженный конфиг во временную мапу для отображения
 	tos.fillShapku(servers.Data)
-	tos.AddHeader()
+	// tos.AddHeader()
 
 	go runSpa()
 

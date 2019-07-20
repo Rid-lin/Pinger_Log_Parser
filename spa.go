@@ -64,7 +64,7 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Println("Ошибка чтения")
 	}
-	tos.clearCache()
+	// tos.clearCache()
 	date := time.Now().Format("2006_01_02")
 	tos.storageToCache(date)
 	tos.checkactualListIP(&servers)

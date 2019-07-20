@@ -26,8 +26,8 @@ func (s *tableOfStatusType) indexHandler(w http.ResponseWriter, r *http.Request)
 }
 
 func (s *tableOfStatusType) addHeadersHendler(w http.ResponseWriter, r *http.Request) {
-	s.DelHeader()
-	s.AddHeader()
+	// s.DelHeader()
+	// s.AddHeader()
 	http.Redirect(w, r, "/", 302)
 }
 
