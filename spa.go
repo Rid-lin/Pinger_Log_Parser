@@ -15,13 +15,13 @@ import (
 
 func getAdresses(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(tos.Data)
+	json.NewEncoder(w).Encode(tos.ServersList)
 }
 
 func getAdress(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	params := mux.Vars(r)
-	item := tos.Data[params["IP"]]
+	item := tos.ServersList[params["IP"]]
 	json.NewEncoder(w).Encode(item)
 	json.NewEncoder(w).Encode(&LineOfStatusTableType{})
 }
@@ -30,15 +30,15 @@ func createAdress(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var adress LineOfStatusTableType
 	_ = json.NewDecoder(r.Body).Decode(&adress)
-	tos.Data[adress.IP] = adress
+	tos.ServersList[adress.IP] = adress
 	json.NewEncoder(w).Encode(adress)
-	json.NewEncoder(w).Encode(tos.Data)
+	json.NewEncoder(w).Encode(tos.ServersList)
 	runOncePing(adress.IP)
-	server := servers.Data[adress.IP]
+	server := servers.ServersList[adress.IP]
 	server.IP = adress.IP
 	server.Note = adress.Note
 	server.SiteID = adress.SiteID
-	servers.Data[adress.IP] = server
+	servers.ServersList[adress.IP] = server
 }
 
 func updateAdress(w http.ResponseWriter, r *http.Request) {
@@ -47,16 +47,16 @@ func updateAdress(w http.ResponseWriter, r *http.Request) {
 	var adress LineOfStatusTableType
 	_ = json.NewDecoder(r.Body).Decode(&adress)
 	adress.IP = params["IP"]
-	tos.Data[adress.IP] = adress
+	tos.ServersList[adress.IP] = adress
 	json.NewEncoder(w).Encode(adress)
-	json.NewEncoder(w).Encode(tos.Data)
+	json.NewEncoder(w).Encode(tos.ServersList)
 }
 
 func deleteAdress(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	params := mux.Vars(r)
-	delete(tos.Data, params["IP"])
-	json.NewEncoder(w).Encode(tos.Data)
+	delete(tos.ServersList, params["IP"])
+	json.NewEncoder(w).Encode(tos.ServersList)
 }
 
 func indexHandler(w http.ResponseWriter, r *http.Request) {

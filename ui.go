@@ -9,38 +9,6 @@ import (
 	"strings"
 )
 
-// StatusType type for status servers
-type StatusType struct {
-	Code       string
-	Background string
-	NumPass    int
-	NumFail    int
-}
-
-//StatusNowType type for dysplay status last check
-type StatusNowType struct {
-	Code string
-}
-
-//StatusOfHourType type for calculate of check
-type StatusOfHourType struct {
-	NumPass int
-	NumFail int
-}
-
-//LineOfStatusTableType type for display of table
-type LineOfStatusTableType struct {
-	IP           string
-	Note         string
-	SiteID       string
-	StatusNow    StatusNowType
-	StatusOfHour [24]StatusOfHourType
-}
-
-type tableOfStatusType struct {
-	Data map[string]LineOfStatusTableType
-}
-
 // func (status *StatusOfHourType) calculate() {
 // 	if status.NumFail != 0 && status.NumPass != 0 {
 // 		if status.NumFail > status.NumPass {
@@ -71,7 +39,7 @@ func (tos *tableOfStatusType) fillShapku(source map[string]ServersAttr) {
 		shapkaLine.IP = value.IP
 		shapkaLine.Note = value.Note
 		shapkaLine.SiteID = value.SiteID
-		tos.Data[IP] = shapkaLine
+		tos.ServersList[IP] = shapkaLine
 	}
 }
 
@@ -103,7 +71,7 @@ func (tos *tableOfStatusType) parseLogLine(b []byte) {
 	}
 	IP := strings.Trim(line[21:37], " ")
 	rttStr := line[37:38]
-	status := tos.Data[IP]
+	status := tos.ServersList[IP]
 	if rttStr == "0" {
 		status.StatusOfHour[hour].NumFail++
 		status.StatusNow.Code = "X"
@@ -111,11 +79,11 @@ func (tos *tableOfStatusType) parseLogLine(b []byte) {
 		status.StatusOfHour[hour].NumPass++
 		status.StatusNow.Code = "√"
 	}
-	tos.Data[IP] = status
+	tos.ServersList[IP] = status
 }
 
 // func (tos *tableOfStatusType) fillTable() {
-// 	for IP, status := range tos.Data {
+// 	for IP, status := range tos.ServersList {
 // 		// if IP == "IP адрес" {
 // 		// 	continue
 // 		// }
@@ -124,28 +92,28 @@ func (tos *tableOfStatusType) parseLogLine(b []byte) {
 // 			// cellstatus.calculate()
 // 			status.StatusOfHour[i] = cellstatus
 // 		}
-// 		tos.Data[IP] = status
+// 		tos.ServersList[IP] = status
 // 	}
 // }
 
 func (tos *tableOfStatusType) clearCache() {
-	for IP, line := range tos.Data {
+	for IP, line := range tos.ServersList {
 		if IP == "IP адрес" {
 			continue
 		}
-		delete(tos.Data, IP)
+		delete(tos.ServersList, IP)
 		var status LineOfStatusTableType
 		status.IP = line.IP
 		status.Note = line.Note
 		status.SiteID = line.SiteID
-		tos.Data[IP] = status
+		tos.ServersList[IP] = status
 	}
 
 }
 
 // //DelHeader Delete Header from map
 // func (tos *tableOfStatusType) DelHeader() {
-// 	delete(tos.Data, "IP адрес")
+// 	delete(tos.ServersList, "IP адрес")
 // }
 
 //AddHeader Add Header to map
@@ -163,13 +131,13 @@ func (tos *tableOfStatusType) clearCache() {
 // 			serverElm.StatusOfHour[i-1].Code = str
 // 		}
 // 	}
-// 	tos.Data["IP адрес"] = serverElm
+// 	tos.ServersList["IP адрес"] = serverElm
 // }
 
-func (tos *tableOfStatusType) checkactualListIP(servers *ListOfServers) {
-	for IP := range tos.Data {
-		if _, ok := servers.Data[IP]; !ok && IP != "IP адрес" {
-			delete(tos.Data, IP)
+func (tos *tableOfStatusType) checkactualListIP(servers *Configuration) {
+	for IP := range tos.ServersList {
+		if _, ok := servers.ServersList[IP]; !ok && IP != "IP адрес" {
+			delete(tos.ServersList, IP)
 		}
 	}
 }

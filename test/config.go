@@ -41,22 +41,20 @@ func getExistingFile(fileName string, names []string) string {
 
 // Read the config file from the current directory and marshal
 // into the conf config struct.
-// Example 	servers = getConf("./config.json")
-func getConf(nameFile string) Configuration {
+func getConf(nameFile string) ListOfServers {
 
 	configFile, err := os.Open(nameFile)
 	string := fmt.Sprint("Get of config failed. Config file not found on patch ", nameFile)
 	chkM(string, err)
 	defer configFile.Close()
 	jsonParser := json.NewDecoder(configFile)
-	// conf := Configuration{}
-	var conf *Configuration
+	// conf := ListOfServers{}
+	var conf *ListOfServers
 	jsonParser.Decode(&conf)
 	return *conf
 }
 
-// Example saveConf("./config.json", struct)
-func saveConf(nameFile string, conf *Configuration) {
+func saveConf(nameFile string, conf *ListOfServers) {
 
 	j, err := json.MarshalIndent(conf, "", "    ")
 	chk(err)
@@ -68,10 +66,14 @@ func saveConf(nameFile string, conf *Configuration) {
 	fileConfig.Close()
 }
 
-// Example err := backupConfig("./config.json")
-func backupConfig(nameFile string) error {
+func backupConfig(nameFile string, logLevel int) error {
 	srcFolder := nameFile
 	destFolder := nameFile + ".bak"
 	err := os.Rename(srcFolder, destFolder)
-	return err
+	if err != nil {
+		toLog(logLevel, 2, "Rename file failed: ", err)
+		// log.Println(err)
+		return err
+	}
+	return nil
 }

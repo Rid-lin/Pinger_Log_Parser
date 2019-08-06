@@ -41,7 +41,7 @@ func (s *tableOfStatusType) makereport() (string, error) {
 		fmt.Println(err)
 		return outputFileName, err
 	}
-	for key, value := range s.Data {
+	for key, value := range s.ServersList {
 		xlsx.SetCellValue(wSheet, "B"+strconv.Itoa(index+6), index)
 		xlsx.SetCellValue(wSheet, "C"+strconv.Itoa(index+6), value.Note)
 		xlsx.SetCellValue(wSheet, "E"+strconv.Itoa(index+6), key)

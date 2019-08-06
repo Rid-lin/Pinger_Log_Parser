@@ -31,7 +31,7 @@ func (s *tableOfStatusType) addHeadersHendler(w http.ResponseWriter, r *http.Req
 	http.Redirect(w, r, "/", 302)
 }
 
-func (s *ListOfServers) editHandler(w http.ResponseWriter, r *http.Request) {
+func (s *Configuration) editHandler(w http.ResponseWriter, r *http.Request) {
 	writetmpl, err := template.ParseFiles("template/write.html", "template/header.html", "template/footer.html")
 	if err != nil {
 		fmt.Fprint(w, err.Error())
@@ -39,7 +39,7 @@ func (s *ListOfServers) editHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	IP := r.FormValue("IP")
-	serverElm, ok := s.Data[IP]
+	serverElm, ok := s.ServersList[IP]
 	if !ok {
 		http.NotFound(w, r)
 	}
@@ -50,7 +50,7 @@ func (s *ListOfServers) editHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (s *ListOfServers) writeHandler(w http.ResponseWriter, r *http.Request) {
+func (s *Configuration) writeHandler(w http.ResponseWriter, r *http.Request) {
 	writetmpl, err := template.ParseFiles("template/write.html", "template/header.html", "template/footer.html")
 	if err != nil {
 		fmt.Fprint(w, err.Error())
@@ -62,54 +62,56 @@ func (s *ListOfServers) writeHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (s *ListOfServers) addserverHandler(w http.ResponseWriter, r *http.Request) {
+func (s *Configuration) addserverHandler(w http.ResponseWriter, r *http.Request) {
 	var serverElm ServersAttr
 	serverElm.IP = r.FormValue("IP")
 	serverElm.Note = r.FormValue("Note")
 	serverElm.SiteID = r.FormValue("SiteID")
 	runOncePing(serverElm.IP)
-	s.Data[serverElm.IP] = serverElm
-	tos.fillShapku(servers.Data)
+	s.ServersList[serverElm.IP] = serverElm
+	tos.fillShapku(servers.ServersList)
 	http.Redirect(w, r, "/", 302)
 }
 
-func (s *ListOfServers) deleteHandler(w http.ResponseWriter, r *http.Request) {
+func (s *Configuration) deleteHandler(w http.ResponseWriter, r *http.Request) {
 	IP := r.FormValue("IP")
 	if IP == "" {
 		http.NotFound(w, r)
 	}
-	delete(s.Data, IP)
+	delete(s.ServersList, IP)
 	http.Redirect(w, r, "/", 302)
 }
 
-func (s *ListOfServers) checkNowHandler(w http.ResponseWriter, r *http.Request) {
+func (s *Configuration) checkNowHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Printf("Проверяю список адресов... \n")
 	runPinger()
 	http.Redirect(w, r, "/", 302)
 }
 
 //ReLoadDefaultConfigHandler Reload Config servers
-func (s *ListOfServers) ReLoadDefaultConfigHandler(w http.ResponseWriter, r *http.Request) {
-	s.LoadDefaultConfig()
+func (s *Configuration) ReLoadDefaultConfigHandler(w http.ResponseWriter, r *http.Request) {
+	conf := getConf("./default_config.json")
+	s = &conf
 	s.checkNowHandler(w, r)
 	fmt.Printf("Ждём минут: %d\n", servers.TimeOutSleep)
 	fmt.Println("================================================================================")
-
 }
 
 //ReLoadConfigHandler Reload Config servers
-func (s *ListOfServers) ReLoadConfigHandler(w http.ResponseWriter, r *http.Request) {
+func (s *Configuration) ReLoadConfigHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Printf("Читаю конфигурационный файл config.json\n")
-	s.LoadConfig("config.json")
-	// s.checkNowHandler(w, r)
-	// fmt.Printf("Ждём минут: %d\n", servers.TimeOutSleep)
-	// fmt.Println("================================================================================")
+	conf := getConf("./default_config.json")
+	s = &conf
 	http.Redirect(w, r, "/", 302)
 }
 
 //SaveConfigHandler Save configuration in file JSON
-func (s *ListOfServers) SaveConfigHandler(w http.ResponseWriter, r *http.Request) {
-	backupConfig("config.json")
-	s.SaveConfig("config.json")
+func (s *Configuration) SaveConfigHandler(w http.ResponseWriter, r *http.Request) {
+	err := backupConfig("./config.json")
+	if err != nil {
+		toLog(s.logLevel, 2, "Rename file failed: ", err)
+	}
+
+	saveConf("./config.json", s)
 	http.Redirect(w, r, "/", 302)
 }

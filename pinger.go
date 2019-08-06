@@ -29,11 +29,9 @@ func runOncePing(IP string) {
 }
 
 //checkLoop URL periodic
-func (s *ListOfServers) checkLoop() {
+func (s *Configuration) checkLoop() {
 	for {
 		runPinger()
-		fmt.Printf("Ждём минут: %d\n", servers.TimeOutSleep)
-		fmt.Println("================================================================================")
 		time.Sleep(time.Duration(servers.TimeOutSleep) * time.Minute)
 	}
 }
