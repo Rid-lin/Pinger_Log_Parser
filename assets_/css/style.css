@@ -1,46 +1,57 @@
-html, body {
-    background: url(/assets/img/bg.jpg) no-repeat;
-    background-size: 100%;
-    background-attachment: fixed;
+*{
+    margin: 0px;
+    padding: 0px;
 }
 
+body{
+       background-color: #f1f1f1
+ 
+}
 
+header {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 9fr;
 
-table {
+}
+
+.submenu{
+    font-size: 0.9em;
+}
+
+.submenu li{
+    padding:0.3rem;
+}
+
+.main{
+    display: grid;
+    grid-template-columns: 1fr 7fr;
+    margin: 1rem 0;
+}
+
+.maintable {
     empty-cells: show;
     margin: auto;
     width: 96%;
-    border-collapse: separate;
-    border-radius: 5px;
-    background-color: #aadcdca3;
+    border: 1px solid black;
+    border-collapse: collapse;
     box-shadow: black 8px 7px 9px 1px;
 }
 
-table td, th {
-    border-radius: 5px;
+.maintable td, th {
     border: 1px solid black;
     font-size: 0.7em;
 }
-
-@media (min-width: 1367px) and (max-width: 1500px) {
-    table td, th {
-    	font-size: 0.9em;
-        }
-    }
-
-@media (min-width: 1501px) {
-    table td, th {
-    	font-size: 1.1em;
-        }
-    }
-
+.legend td, th {
+    border: 1px solid black;
+    font-size: 0.7em;
+}
 
 .maintable a{
     color: #0c0229;
 }
 
 #legendID{
-    padding-top: 25px;
+    padding-top: 2rem;
 }
 
 
@@ -91,8 +102,8 @@ table td, th {
 }
 
 footer {
-    padding-top: 20px;
-    padding-bottom: 20px;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
     background-color: #02020245;
     display: grid;
     margin: auto;

@@ -3,7 +3,7 @@
 <div id="maintableID">
 <table class="maintable">
     <tr>
-        {{range $k, $v := .ServersList}} {{if eq $k "IP адрес"}}
+        {{/* {{range $k, $v := .}} {{if eq $k "IP адрес"}}
         <th>{{$k}}</th>
         <th class="small-font">{{$v.Note}}</th>
         <th>{{$v.SiteID}}</th>
@@ -12,9 +12,15 @@
         <th>
             {{$s.Code}}
         </th>
-        {{end}} {{end}} {{end}}
+        {{end}} {{end}} {{end}} */}}
+        <th>IP адрес</th>
+        <th class="small-font">Описание</th>
+        <th>SiteID</th>
+        <th class="small-font">тек.стат</th>
+        <th>00</th><th>01</th><th>02</th><th>03</th><th>04</th><th>05</th><th>06</th><th>07</th><th>08</th><th>09</th><th>10</th><th>11</th><th>12</th><th>13</th><th>14</th><th>15</th><th>16</th><th>17</th><th>18</th><th>19</th><th>20</th><th>21</th><th>22</th><th>23</th>
+
     </tr>
-    {{range $k, $v := .ServersList}} {{if ne $k "IP адрес"}}
+    {{range $k, $v := .}} {{if ne $k "IP адрес"}}
     <tr>
         <td><a class="b-href" href="http://{{$k}}/">{{$k}}</a></td>
         <td class="small-font">
@@ -23,17 +29,41 @@
             <a class="b-href" href="/edit?IP={{$k}}">{{$v.Note}}</a>
         </td>
         <td>{{$v.SiteID}}</td>
-        <td class="{{$v.StatusNow.Background}}">{{$v.StatusNow.Code}}</td>
+        <!-- Текущий статус -->
+        {{if eq $v.StatusNow.Code "√"}}
+            <td class="bggreen">√</td>
+        {{else if eq $v.StatusNow.Code "X"}}
+            <td class="bgred">X</td>
+        {{else}}
+        <td class="bggrey">O</td>
+        {{end}}
         <!-- Основная таблица статусов спутниковых станций -->
         {{range $s := $v.StatusOfHour}}
-        <td class="{{$s.Background}}">
-            {{$s.Code}}
-        </td>
-        {{end}}
+            {{if eq $s.NumFail 0}}
+                {{if eq $s.NumPass 0}}
+                    <td class="bggrey">O</td>
+                {{else if ne $s.NumPass 0}}
+                    <td class="bggreen">√</td>
+                {{end}}
+            {{else if ne $s.NumFail 0}}
+                {{if eq $s.NumPass 0}}
+                    <td class="bgred">X</td>
+                {{else if ne $s.NumPass 0}}
+                    {{if gt $s.NumPass $s.NumFail}}
+                        <td class="bgyellowgreen">√</td>
+                    {{else if lt $s.NumPass $s.NumFail}}
+                        <td class="bgpalevioletred">X</td>
+                    {{else}}
+                        <td class="bgyellow">√</td>
+                    {{end}}
+                {{end}}
+
+            {{end}}
+        {{end}} 
     </tr>
     {{end}} {{end}}
 </table>
-</div>
+</div><div></div>
 
 <div id="legendID">
 <table class="legend">
@@ -47,4 +77,6 @@
     </tr>
 </table>
 </div>
+
+
 {{ template "footer" }} {{ end }}

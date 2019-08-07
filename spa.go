@@ -66,7 +66,8 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	// tos.clearCache()
 	date := time.Now().Format("2006_01_02")
-	tos.storageToCache(date)
+	tos.readFromLogs(date)
+	// s.storageToCache(date)
 	tos.checkactualListIP(&servers)
 
 	fmt.Fprintf(w, "%s", file)

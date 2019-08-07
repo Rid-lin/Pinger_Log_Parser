@@ -18,22 +18,21 @@ func (s *tableOfStatusType) getreportHandler(w http.ResponseWriter, r *http.Requ
 		fmt.Fprint(w, err.Error())
 		return
 	}
-	tmpl, err := template.ParseFiles("template/getreport.html", "template/header.html", "template/footer.html")
+	templateString := templHeader + templReport + templFooter
+
+	tmpl, err := template.New("report").Parse(templateString)
 	if err != nil {
 		fmt.Fprint(w, err.Error())
 		return
 	}
-	err = tmpl.ExecuteTemplate(w, "getreport", outputFileName)
-	if err != nil {
-		fmt.Fprint(w, err.Error())
-	}
+	tmpl.Execute(w, outputFileName)
 
 }
 
 func (s *tableOfStatusType) makereport() (string, error) {
 	// fmt.Println("выполняется makereport")
 	wSheet := "Отчет"
-	templateFile := "template/Template.xlsx"
+	templateFile := "./Template.xlsx"
 	index := 1
 	outputFileName := time.Now().Format("2006-01-02") + ".xlsx"
 	xlsx, err := excelize.OpenFile(templateFile)

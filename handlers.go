@@ -8,31 +8,33 @@ import (
 	"time"
 )
 
-func (s *tableOfStatusType) indexHandler(w http.ResponseWriter, r *http.Request) {
-	indextmpl, err := template.ParseFiles("template/index.html", "template/header.html", "template/footer.html")
+func (tos *tableOfStatusType) indexHandler(w http.ResponseWriter, r *http.Request) {
+	templateString := templHeader + templIndex + templFooter
+	tmpl, err := template.New("index").Parse(templateString)
 	if err != nil {
 		fmt.Fprint(w, err.Error())
 		return
 	}
 	date := time.Now().Format("2006_01_02")
-	s.clearCache()
+	tos.clearCache()
 
-	s.storageToCache(date)
-	s.checkactualListIP(&servers)
-	err = indextmpl.ExecuteTemplate(w, "index", s)
-	if err != nil {
-		fmt.Fprint(w, err.Error())
-	}
+	tos.readFromLogs(date)
+	tos.checkactualListIP(&servers)
+
+	tmpl.Execute(w, tos.ServersList)
+
 }
 
-func (s *tableOfStatusType) addHeadersHendler(w http.ResponseWriter, r *http.Request) {
-	// s.DelHeader()
-	// s.AddHeader()
+func (tos *tableOfStatusType) addHeadersHendler(w http.ResponseWriter, r *http.Request) {
+	// tos.DelHeader()
+	// tos.AddHeader()
 	http.Redirect(w, r, "/", 302)
 }
 
 func (s *Configuration) editHandler(w http.ResponseWriter, r *http.Request) {
-	writetmpl, err := template.ParseFiles("template/write.html", "template/header.html", "template/footer.html")
+	templateString := templHeader + templWrite + templFooter
+
+	tmpl, err := template.New("data").Parse(templateString)
 	if err != nil {
 		fmt.Fprint(w, err.Error())
 		return
@@ -44,10 +46,8 @@ func (s *Configuration) editHandler(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 	}
 
-	err = writetmpl.ExecuteTemplate(w, "write", serverElm)
-	if err != nil {
-		fmt.Fprint(w, err.Error())
-	}
+	tmpl.Execute(w, serverElm)
+
 }
 
 func (s *Configuration) writeHandler(w http.ResponseWriter, r *http.Request) {
@@ -82,9 +82,17 @@ func (s *Configuration) deleteHandler(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/", 302)
 }
 
+func (s *Configuration) getIPLists() []string {
+	var slice []string
+	for ip := range s.ServersList {
+		slice = append(slice, ip)
+	}
+	return slice
+}
+
 func (s *Configuration) checkNowHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Printf("Проверяю список адресов... \n")
-	runPinger()
+
+	runPinger(s.getIPLists())
 	http.Redirect(w, r, "/", 302)
 }
 
@@ -93,13 +101,13 @@ func (s *Configuration) ReLoadDefaultConfigHandler(w http.ResponseWriter, r *htt
 	conf := getConf("./default_config.json")
 	s = &conf
 	s.checkNowHandler(w, r)
-	fmt.Printf("Ждём минут: %d\n", servers.TimeOutSleep)
-	fmt.Println("================================================================================")
+
+	toLog(servers.logLevel, 1, fmt.Sprintf("Ждём минут: %d\n", servers.TimeOutSleep))
 }
 
 //ReLoadConfigHandler Reload Config servers
 func (s *Configuration) ReLoadConfigHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Printf("Читаю конфигурационный файл config.json\n")
+	// fmt.Printf("Читаю конфигурационный файл config.json\n")
 	conf := getConf("./default_config.json")
 	s = &conf
 	http.Redirect(w, r, "/", 302)
@@ -114,4 +122,22 @@ func (s *Configuration) SaveConfigHandler(w http.ResponseWriter, r *http.Request
 
 	saveConf("./config.json", s)
 	http.Redirect(w, r, "/", 302)
+}
+
+func runWeb() {
+	http.HandleFunc("/", tos.indexHandler)
+	http.HandleFunc("/getreport", tos.getreportHandler)
+	http.HandleFunc("/checknow", servers.checkNowHandler)
+	http.HandleFunc("/write", servers.writeHandler)
+	http.HandleFunc("/addserver", servers.addserverHandler)
+	http.HandleFunc("/edit", servers.editHandler)
+	http.HandleFunc("/delete", servers.deleteHandler)
+	http.HandleFunc("/loaddefaultconf", servers.ReLoadDefaultConfigHandler)
+	http.HandleFunc("/reloadconf", servers.ReLoadConfigHandler)
+	http.HandleFunc("/saveconf", servers.SaveConfigHandler)
+	http.Handle("/report/", http.StripPrefix("/report/", http.FileServer(http.Dir("./report"))))
+	http.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir("./assets"))))
+	toLog(servers.logLevel, 1, "Запуск локального WEB-сервера на порту :8089")
+
+	http.ListenAndServe(":8089", nil)
 }
